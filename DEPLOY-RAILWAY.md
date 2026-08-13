@@ -36,6 +36,7 @@ TerriaMap merges do not conflict.
 | `init/simple.json` | Upstream default catalog (unmodified) |
 | `init/iwmi-limpopo.json` | `dem_limpopo` COG + `limpopo_subbasins` footprint; both on the workbench, camera framed on the basin |
 | `init/iwmi-water-accounting.json` | "IWMI Water Accounting (WA+)" folder — 9 basin sub-folders, 156 COG layers. Generated; not on the workbench |
+| `init/iwmi-timeseries.json` | "IWMI Time Series" folder — 5 products, 207 COG layers, one per time step. Generated; not on the workbench |
 
 ### Regenerating the water accounting folder
 
@@ -45,6 +46,27 @@ explorer's STAC API rather than hand-maintained:
 ```bash
 node scripts/generate-water-accounting-init.mjs
 ```
+
+### Time series are discrete layers, not an animated timeline
+
+`node scripts/generate-timeseries-init.mjs` regenerates the time series folder.
+
+The timeline cannot drive these layers. TerriaJS 8.12.5 declares the COG type as
+`CogCatalogItem extends MappableMixin(CatalogMemberMixin(CreateModel(CogCatalogItemTraits)))`
+— no `DiscretelyTimeVaryingMixin`, which is what feeds the timeline. Only
+`GeojsonMixin` / `TableMixin` / `TimeFilterMixin` / `ArcGisImageServer` /
+`ArcGisMapServer` items animate. The explorer publishes no WMS with a `TIME` dimension
+(`/ows` returns 404), so there is no time-enabled raster service to point at instead.
+
+Animating the products' vector footprints is not a useful substitute: every time step of
+every product shares one identical footprint polygon and carries no values in its
+properties, so it would animate a static rectangle.
+
+Getting a real animated series would need one of:
+
+- a WMS/WMTS with a `TIME` dimension, or an ArcGIS ImageServer, in front of the rasters;
+- a tabular or GeoJSON series carrying values with a time column — e.g. zonal statistics per
+  time step. That is a derived product, not a republish of what the explorer serves.
 
 ### CORS, and why some layers are proxied
 

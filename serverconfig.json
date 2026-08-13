@@ -19,6 +19,10 @@
     // directly, so it deliberately is not listed here.)
     "pub-43d699efb2a2495eb85a4b417443e541.r2.dev",
 
+    // One et_monthly_limpopo time step is served from this bucket. It is readable but,
+    // unlike the -public bucket, returns no CORS headers, so that layer is proxied.
+    "copy-iwmi-dt-odc-products-private.s3.af-south-1.amazonaws.com",
+
     "githubusercontent.com",
 
     // NOTE: The following default entries are deprecated and will be removed in a future release. If you rely ony terria proxying to any of these servers, please add them through a custom serverconfig.json. See https://docs.terria.io/guide/getting-started/#customizing-terriamap

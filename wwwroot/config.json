@@ -1,6 +1,11 @@
 {
   /* Names of init files (in wwwroot/init), without the .json extension, to load by default */
-  "initializationUrls": ["simple", "iwmi-limpopo", "iwmi-water-accounting"],
+  "initializationUrls": [
+    "simple",
+    "iwmi-limpopo",
+    "iwmi-water-accounting",
+    "iwmi-timeseries"
+  ],
   "parameters": {
     "googleUrlShortenerKey": null,
     "googleAnalyticsKey": null,
