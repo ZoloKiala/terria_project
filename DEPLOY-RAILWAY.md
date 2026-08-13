@@ -37,6 +37,7 @@ TerriaMap merges do not conflict.
 | `init/iwmi-limpopo.json` | `dem_limpopo` COG + `limpopo_subbasins` footprint; both on the workbench, camera framed on the basin |
 | `init/iwmi-water-accounting.json` | "IWMI Water Accounting (WA+)" folder — 9 basin sub-folders, 156 COG layers. Generated; not on the workbench |
 | `init/iwmi-timeseries.json` | "IWMI Time Series" folder — 5 products, 207 COG layers, one per time step. Generated; not on the workbench |
+| `init/iwmi-ows-timeseries.json` | "IWMI Animated Time Series (WMS)" — 4 time-enabled layers from datacube-ows. These are the ones the timeline animates |
 
 ### Regenerating the water accounting folder
 
@@ -47,7 +48,33 @@ explorer's STAC API rather than hand-maintained:
 node scripts/generate-water-accounting-init.mjs
 ```
 
-### Time series are discrete layers, not an animated timeline
+### Animated layers come from datacube-ows, not from COGs
+
+`init/iwmi-ows-timeseries.json` holds the layers the timeline can actually animate. They are
+served by the `ows` service (datacube-ows 1.9.15) in the `open-data-cube` Railway project, at
+`https://ows-production-108d.up.railway.app/wms`, over the same ODC index the explorer uses.
+Its layer config lives in that repo at `services/ows/ows_cfg/timeseries.py`.
+
+| Layer | Steps | Range |
+| --- | --- | --- |
+| `et_monthly_limpopo` | 101 | 2018-01 – 2026-06 |
+| `africa_flood_occurrence` | 24 | 2001 – 2024 |
+| `limpopo_rainfall_anomaly` | 12 | 2023-06 – 2026-11 |
+| `limpopo_temperature_anomaly` | 12 | 2023-06 – 2026-11 |
+
+If a layer stops appearing, check `GetCapabilities` first — datacube-ows only advertises a
+layer once `datacube-ows-update` has computed its ranges, and a layer with no ranges is
+silently dropped from the document rather than erroring:
+
+```bash
+curl -s "https://ows-production-108d.up.railway.app/wms?service=WMS&version=1.3.0&request=GetCapabilities" \
+  | grep -c 'Dimension name="time"'    # expect 4
+```
+
+`wapor_eta_20m` is configured there but never appears, because its datasets have no usable
+extent (`has no extent in CRS EPSG:4326. Skipping.`) — an upstream data problem, not config.
+
+### The COG time series are discrete layers, not an animated timeline
 
 `node scripts/generate-timeseries-init.mjs` regenerates the time series folder.
 

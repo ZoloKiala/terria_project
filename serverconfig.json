@@ -23,6 +23,11 @@
     // unlike the -public bucket, returns no CORS headers, so that layer is proxied.
     "copy-iwmi-dt-odc-products-private.s3.af-south-1.amazonaws.com",
 
+    // datacube-ows, which serves the time-enabled (animated) WMS layers. It sends no CORS
+    // headers, and Cesium loads imagery into WebGL textures, which requires them -- so both
+    // GetCapabilities and the tiles go through this server's proxy.
+    "ows-production-108d.up.railway.app",
+
     "githubusercontent.com",
 
     // NOTE: The following default entries are deprecated and will be removed in a future release. If you rely ony terria proxying to any of these servers, please add them through a custom serverconfig.json. See https://docs.terria.io/guide/getting-started/#customizing-terriamap

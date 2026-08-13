@@ -1,0 +1,78 @@
+{
+  "catalog": [
+    {
+      "id": "iwmi-ows-animated",
+      "type": "group",
+      "name": "IWMI Animated Time Series (WMS)",
+      "description": "Time-enabled layers served by datacube-ows over the IWMI Data Cube index. Unlike the COG layers in \"IWMI Time Series\", these carry a WMS TIME dimension, so TerriaJS puts them on the timeline and can animate them — press play in the bottom dock. Rendering and colour ramps are applied server-side by OWS; the legend comes from GetLegendGraphic.",
+      "isOpen": true,
+      "members": [
+        {
+          "id": "iwmi-ows-et-monthly-limpopo",
+          "type": "wms",
+          "name": "Limpopo monthly actual ET — animated (2018–2026)",
+          "description": "Monthly WaPOR actual evapotranspiration and interception for the Limpopo basin, 101 monthly time steps. Values are the raw WaPOR `L2_AETI_M` band, which is stored at 0.1 mm/month scaling — the legend is labelled accordingly, so read 1000 on the ramp as roughly 100 mm/month. Confirm the scale factor with IWMI before quoting absolute ET.",
+          "url": "https://ows-production-108d.up.railway.app/wms",
+          "layers": "et_monthly_limpopo",
+          "styles": "aeti_monthly",
+          "forceProxy": true,
+          "initialTimeSource": "stop",
+          "opacity": 0.8,
+          "info": [
+            {
+              "name": "How this differs from the COG layers",
+              "content": "The same rasters also appear under \"IWMI Time Series\" as one COG layer per month. Those cannot animate: TerriaJS's `cog` type has no time support. This layer is the same data served through WMS with a TIME dimension, which is what the timeline can drive."
+            },
+            {
+              "name": "Source",
+              "content": "Product `et_monthly_limpopo` in the IWMI Data Cube, served by datacube-ows. https://explorer-production-0070.up.railway.app/products/et_monthly_limpopo"
+            }
+          ]
+        },
+        {
+          "id": "iwmi-ows-africa-flood-occurrence",
+          "type": "wms",
+          "name": "Africa annual flood occurrence — animated (2001–2024)",
+          "description": "Annual flood occurrence across Africa at about 500 m, 24 annual time steps. Counts of flood detections within the year; the rasters are extremely sparse by design (only cells where flooding was detected carry a value), so expect scattered pixels rather than continuous coverage. The value's meaning is inferred from its distribution, not documented by the publisher.",
+          "url": "https://ows-production-108d.up.railway.app/wms",
+          "layers": "africa_flood_occurrence",
+          "styles": "flood_occurrence",
+          "forceProxy": true,
+          "initialTimeSource": "start",
+          "opacity": 0.9,
+          "info": [
+            {
+              "name": "Caveat",
+              "content": "The per-year maximum is not fixed (17 in 2001, 37 in 2020), so the ramp is pinned to 37 to keep years comparable. Do not report a value as an established count of floods."
+            }
+          ]
+        },
+        {
+          "id": "iwmi-ows-limpopo-rainfall-anomaly",
+          "type": "wms",
+          "name": "Limpopo rainfall anomaly — animated (ENSO forecast)",
+          "description": "Monthly rainfall anomaly from the Limpopo ENSO briefing, 12 forecast months. Brown is drier than normal, teal wetter. This is a coarse 1-degree forecast grid (12x8 cells over the basin), not an observation product — it will look blocky, which is honest to its resolution.",
+          "url": "https://ows-production-108d.up.railway.app/wms",
+          "layers": "limpopo_rainfall_anomaly",
+          "styles": "rainfall_anomaly",
+          "forceProxy": true,
+          "initialTimeSource": "stop",
+          "opacity": 0.7
+        },
+        {
+          "id": "iwmi-ows-limpopo-temperature-anomaly",
+          "type": "wms",
+          "name": "Limpopo temperature anomaly — animated (ENSO forecast)",
+          "description": "Monthly temperature anomaly from the Limpopo ENSO briefing, 12 forecast months. Blue is cooler than normal, red warmer. Same coarse 1-degree forecast grid as the rainfall anomaly.",
+          "url": "https://ows-production-108d.up.railway.app/wms",
+          "layers": "limpopo_temperature_anomaly",
+          "styles": "temperature_anomaly",
+          "forceProxy": true,
+          "initialTimeSource": "stop",
+          "opacity": 0.7
+        }
+      ]
+    }
+  ],
+  "workbench": ["iwmi-ows-et-monthly-limpopo", "iwmi-limpopo-subbasins"]
+}

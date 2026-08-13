@@ -4,7 +4,8 @@
     "simple",
     "iwmi-limpopo",
     "iwmi-water-accounting",
-    "iwmi-timeseries"
+    "iwmi-timeseries",
+    "iwmi-ows-timeseries"
   ],
   "parameters": {
     "googleUrlShortenerKey": null,
