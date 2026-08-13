@@ -13,6 +13,7 @@ Railway builds the multi-stage [`Dockerfile`](Dockerfile) at the repo root and r
 | `serverconfig.json` | `"trustProxy": true` | Railway terminates TLS and reverse-proxies to the container. Without trusting `X-Forwarded-*`, terriajs-server generates share URLs with the wrong scheme/host. |
 | `.dockerignore` | added | Keeps the host's `node_modules` and `wwwroot/build` out of the build context. The build stage runs its own `yarn install`; host-built native modules are not portable into the Linux image. |
 | `railway.json` | added | Pins the Dockerfile builder and sets a `/` healthcheck with a 300s timeout (the image is large and cold-starts slowly). |
+| `.railwayignore` | added | `railway up` uploads the working directory and does not exclude `node_modules`; the ~576 MB upload failed with `500 Internal Server Error`. With this file the snapshot is ~8.5 MB. |
 
 ## Remotes
 
@@ -69,10 +70,40 @@ docker build -t terriamap .
 docker run -p 3001:3001 terriamap
 ```
 
+## The live deployment
+
+| | |
+| --- | --- |
+| URL | https://terriamap-production-2a14.up.railway.app |
+| Railway project | `terria-project` (`ed626eb2-bb7a-4dda-a40e-8ad1f41d9800`) |
+| Service | `terriamap`, environment `production`, region US West |
+
 ## Deploying
 
+The service was created against this GitHub repo, but **pushing does not currently
+trigger a build** — Railway's GitHub App still has to be authorized on the repo, which can
+only be done from the Railway dashboard (Service → Settings → Source). Until that is
+done, deploy from the CLI:
+
 ```bash
-railway up            # from this directory, once linked to a service
+railway up            # builds the Dockerfile on Railway and deploys
 ```
 
-Or push to `origin` if the Railway service is connected to the GitHub repo.
+Once the GitHub App is authorized, `git push origin main` will deploy on its own.
+
+## Verifying a deploy
+
+Railway assigns `$PORT` at runtime (8080 on the current deploy), so the runtime log should
+report that port rather than 3001:
+
+```bash
+railway logs        # expect: Serving directory "/app/wwwroot" on port 8080 to the world.
+```
+
+Assets worth spot-checking, since they come from three different build steps:
+
+| Path | Produced by |
+| --- | --- |
+| `/build/TerriaMap.js`, `/build/TerriaMap.css` | webpack, `gulp release-app` |
+| `/build/TerriaJS/build/Cesium/build/Workers/…` | terriajs `postinstall`, then `copy-terriajs-assets` |
+| `/config.json`, `/init/simple.json` | committed in `wwwroot` |

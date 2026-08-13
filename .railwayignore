@@ -1,0 +1,23 @@
+# Keeps `railway up` uploads small. The build stage runs its own `yarn install` and
+# `gulp release`, so host-installed dependencies and build output must not be uploaded
+# (host-built native modules are not portable into the Linux image anyway).
+node_modules
+**/node_modules
+.git
+
+# Regenerated inside the image by `gulp release`.
+wwwroot/build
+wwwroot/doc
+wwwroot/index.html
+version.js
+version.json
+
+# Not needed to build or run the app.
+doc
+architecture
+ckanext-cesiumpreview
+.devcontainer
+.github
+deploy/packages
+deploy/work
+*.log
