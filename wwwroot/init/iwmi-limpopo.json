@@ -1,0 +1,68 @@
+{
+  "catalog": [
+    {
+      "id": "iwmi-limpopo",
+      "type": "group",
+      "name": "IWMI Data Cube — Limpopo",
+      "description": "Products from the IWMI Data Cube explorer at https://explorer-production-0070.up.railway.app. One raster (COG read directly from public S3) and one vector (dataset footprint served by the explorer API).",
+      "isOpen": true,
+      "members": [
+        {
+          "id": "iwmi-dem-limpopo",
+          "type": "cog",
+          "name": "Limpopo DEM (90 m)",
+          "description": "Digital elevation model of the Limpopo basin, 90 m, EPSG:3857, int32 metres. Read client-side as a Cloud Optimised GeoTIFF straight from IWMI's public S3 bucket — the bucket sends `Access-Control-Allow-Origin: *` and supports range requests, so no proxy is needed.",
+          "url": "https://iwmi-dt-odc-products-public.s3.af-south-1.amazonaws.com/Natural_Basin_Characteristic/Phisiography/dem_limpopo/2024/12/31_interim/dem_limpopo_2024-12-31_interim_gray.tif",
+          "renderOptions": {
+            "nodata": -9999,
+            "resampleMethod": "bilinear"
+          },
+          "opacity": 1,
+          "credit": "IWMI",
+          "info": [
+            {
+              "name": "Source product",
+              "content": "`dem_limpopo` in the IWMI Data Cube. Product page: https://explorer-production-0070.up.railway.app/products/dem_limpopo"
+            },
+            {
+              "name": "Notes",
+              "content": "Nodata is -9999 and is set explicitly so it renders transparent rather than as a black frame. Single band (`gray`), so TerriaJS applies a grayscale stretch."
+            }
+          ]
+        },
+        {
+          "id": "iwmi-limpopo-subbasins",
+          "type": "geojson",
+          "name": "Limpopo sub-basins (extent)",
+          "description": "Footprint of the `limpopo_subbasins` ODC vector product — the dissolved outer boundary of the 27 sub-basins (6 polygon parts, ~40k vertices). The explorer's STAC asset for this product points at a container-local `file:///app/aois/...` path, so the individual sub-basin polygons and their area/perimeter/population attributes are not reachable over HTTP; this footprint from the explorer API is the closest published geometry.",
+          "url": "https://explorer-production-0070.up.railway.app/api/datasets/limpopo_subbasins",
+          "forceProxy": true,
+          "style": {
+            "stroke": "#ffb300",
+            "stroke-width": 3,
+            "stroke-opacity": 1,
+            "fill": "#ffb300",
+            "fill-opacity": 0.07
+          },
+          "info": [
+            {
+              "name": "Source product",
+              "content": "`limpopo_subbasins` in the IWMI Data Cube. Product page: https://explorer-production-0070.up.railway.app/products/limpopo_subbasins"
+            },
+            {
+              "name": "Why this is proxied",
+              "content": "The explorer API does not send CORS headers, so a browser cannot fetch it directly from this origin. `forceProxy` routes it through terriajs-server, and the explorer host is allowlisted in `serverconfig.json`."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "workbench": ["iwmi-limpopo-subbasins", "iwmi-dem-limpopo"],
+  "initialCamera": {
+    "west": 24.2,
+    "south": -27.3,
+    "east": 35.4,
+    "north": -19.0
+  }
+}

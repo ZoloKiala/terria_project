@@ -7,6 +7,11 @@
   "trustProxy": true,
 
   "allowProxyFor": [
+    // The IWMI Data Cube explorer API serves GeoJSON without CORS headers, so vector
+    // items from it are fetched via this server's /proxy endpoint. Matching is exact
+    // hostname or *.domain, so this allows only this one host.
+    "explorer-production-0070.up.railway.app",
+
     "githubusercontent.com",
 
     // NOTE: The following default entries are deprecated and will be removed in a future release. If you rely ony terria proxying to any of these servers, please add them through a custom serverconfig.json. See https://docs.terria.io/guide/getting-started/#customizing-terriamap
