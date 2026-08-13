@@ -7,6 +7,7 @@ Railway builds the multi-stage [`Dockerfile`](Dockerfile) at the repo root and r
 
 | File | Change | Why |
 | --- | --- | --- |
+| `Dockerfile` | `RUN npm install -g gulp-cli@3` in the build stage | Works around an upstream packaging bug in `terriajs@8.12.5`: its `postinstall` runs `gulp post-npm-install` (to copy the Cesium assets) but `gulp` is declared only as a **devDependency**, so it is not installed when terriajs is consumed as a dependency. `yarn install` then fails with `gulp: not found` (exit 127). This bites on every platform, not just Windows. |
 | `Dockerfile` | `CMD` switched to shell form, passing `--port ${PORT:-3001}` | `terriajs-server` only reads the port from the `--port` flag — it ignores `$PORT`. Railway assigns a random `$PORT` per deploy, so the exec-form `CMD` would leave the container listening on 3001 and the healthcheck would never pass. |
 | `Dockerfile` | `ENV NODE_OPTIONS=--max-old-space-size=6144` in the build stage | The Cesium/webpack release build exceeds Node's default heap on a build runner and dies with an OOM. |
 | `serverconfig.json` | `"trustProxy": true` | Railway terminates TLS and reverse-proxies to the container. Without trusting `X-Forwarded-*`, terriajs-server generates share URLs with the wrong scheme/host. |
@@ -23,9 +24,33 @@ git fetch upstream
 git merge upstream/main
 ```
 
-## Local development on Windows
+## Local development
 
-`yarn gulp release` (and `gulp dev`) currently **fail on a Windows host** in
+Two upstream issues affect a local install/build. The container build works around the
+first; the second is Windows-only and does not affect the Railway deploy.
+
+### 1. `yarn install` fails with `gulp: not found` (all platforms)
+
+See the `gulp-cli` row above. On a dev machine, either install gulp-cli globally
+(`npm install -g gulp-cli@3`) before `yarn install`, or put the project's own binaries on
+PATH so the nested lifecycle script can find gulp:
+
+```powershell
+$env:PATH = "$PWD\node_modules\.bin;$env:PATH"
+yarn install --network-timeout 1000000
+```
+
+If `yarn install` already failed at that step, the only thing left undone is copying the
+Cesium assets. Run it directly, then re-run `yarn install`:
+
+```powershell
+cd node_modules\terriajs
+node ..\gulp\bin\gulp.js post-npm-install
+```
+
+### 2. `resolve-url-loader` fails on a Windows host
+
+`yarn gulp release` (and `gulp dev`) then **fail on a Windows host** in
 `resolve-url-loader`:
 
 ```

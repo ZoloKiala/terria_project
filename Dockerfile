@@ -3,6 +3,15 @@ FROM node:24 AS develop
 
 # build container
 FROM node:24 AS build
+
+# terriajs@8.12.5 runs `gulp post-npm-install` (which copies the Cesium assets) from its
+# postinstall hook, but declares gulp only as a devDependency -- so gulp is absent when
+# terriajs is installed as a dependency, and `yarn install` dies with
+# `gulp: not found` (exit 127). Provide the binary globally; gulp-cli then resolves the
+# hoisted local gulp and terriajs' own gulpfile. Installed as root before dropping to
+# USER node, since the node user cannot write to the global prefix.
+RUN npm install -g gulp-cli@3
+
 USER node
 
 COPY --chown=node:node . /app
