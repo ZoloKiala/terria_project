@@ -25,6 +25,43 @@ git fetch upstream
 git merge upstream/main
 ```
 
+## Catalog
+
+Catalog additions live in their own init files, listed in `wwwroot/config.json` under
+`initializationUrls`, so upstream's `wwwroot/init/simple.json` stays untouched and future
+TerriaMap merges do not conflict.
+
+| Init file | Contents |
+| --- | --- |
+| `init/simple.json` | Upstream default catalog (unmodified) |
+| `init/iwmi-limpopo.json` | `dem_limpopo` COG + `limpopo_subbasins` footprint; both on the workbench, camera framed on the basin |
+| `init/iwmi-water-accounting.json` | "IWMI Water Accounting (WA+)" folder — 9 basin sub-folders, 156 COG layers. Generated; not on the workbench |
+
+### Regenerating the water accounting folder
+
+That folder has 156 layers (9 products × 18 or 12 STAC assets), so it is generated from the
+explorer's STAC API rather than hand-maintained:
+
+```bash
+node scripts/generate-water-accounting-init.mjs
+```
+
+### CORS, and why some layers are proxied
+
+Whether a raster can be read straight from the browser depends entirely on the host:
+
+| Asset host | CORS | Consequence |
+| --- | --- | --- |
+| `…s3.af-south-1.amazonaws.com` (`dem_limpopo`) | `Access-Control-Allow-Origin: *` | Read directly, no proxy |
+| `pub-…r2.dev` (water accounting COGs) | none; OPTIONS preflight returns 403 | `forceProxy: true`, host allowlisted |
+| explorer `/api/datasets/…` (vector) | none | `forceProxy: true`, host allowlisted |
+
+Proxied items rely on terriajs-server forwarding `Range` (it is not in `DO_NOT_PROXY_REGEX`),
+which is what makes COG tile reads work through `/proxy`. Anything added from a host without
+CORS needs both `forceProxy: true` on the item **and** the host in `allowProxyFor` in
+`serverconfig.json`; matching is exact-host or `*.domain`, so listing a host does not open a
+general proxy.
+
 ## Local development
 
 Two upstream issues affect a local install/build. The container build works around the
