@@ -1,5 +1,10 @@
 {
+  // Fallback only; Railway's injected $PORT is passed via --port at startup.
   "port": 3001,
+
+  // Railway terminates TLS and reverse-proxies to the container. Trusting the
+  // X-Forwarded-* headers makes terriajs-server generate correct https share URLs.
+  "trustProxy": true,
 
   "allowProxyFor": [
     "githubusercontent.com",
